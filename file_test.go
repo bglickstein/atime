@@ -21,7 +21,7 @@ func TestFileReadCloser(t *testing.T) {
 
 	closeAndSetTimes(t, f)
 
-	r, err := NewFileReadCloser(name)
+	r, err := Open(name)
 	if err != nil {
 		t.Fatal(err)
 	}
