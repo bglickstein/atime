@@ -4,6 +4,8 @@ import (
 	"io"
 	"os"
 	"time"
+
+	orig "github.com/djherbis/atime"
 )
 
 // File satisfies io.Reader, Closer, and Seeker. Stats the
@@ -26,7 +28,7 @@ func Open(path string) (*File, error) {
 	return &File{
 		f:     f,
 		mtime: fi.ModTime(),
-		atime: Get(fi),
+		atime: orig.Get(fi),
 	}, nil
 }
 

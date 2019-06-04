@@ -6,6 +6,8 @@ import (
 	"os"
 	"testing"
 	"time"
+
+	orig "github.com/djherbis/atime"
 )
 
 // Expected time.
@@ -70,7 +72,7 @@ func expectATimeUpdate(t *testing.T, r io.Reader, name string) error {
 	if err != nil {
 		t.Fatal(err)
 	}
-	at := Get(fi)
+	at := orig.Get(fi)
 	if !at.After(et) {
 		t.Errorf("expected atime later than %v, got %v", et, at)
 	}
@@ -82,7 +84,7 @@ func expectATimeReset(t *testing.T, name string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	at := Get(fi)
+	at := orig.Get(fi)
 	if !at.Equal(et) {
 		t.Errorf("expected atime %v, got %v", et, at)
 	}
