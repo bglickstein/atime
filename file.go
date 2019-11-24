@@ -8,15 +8,21 @@ import (
 	orig "github.com/djherbis/atime"
 )
 
-// File satisfies io.Reader, ReaderAt, Closer, and Seeker.
-// Stats the file before opening it
-// and restores the mtime and atime when closing it.
+// File satisfies io.Reader, ReaderAt, and Seeker,
+// delegating each method to the *os.File it contains.
+// It also implements io.Closer.
+//
+// When a File is created with Open, it is statted
+// and its mtime and atime are recorded.
+// When a File is closed, its mtime and atime are restored.
 type File struct {
 	io.ReadCloser
 	io.ReaderAt
 	io.Seeker
 
-	f            *os.File
+	// F is the *os.File to which this object's methods are delegated.
+	F *os.File
+
 	mtime, atime time.Time
 }
 
@@ -33,7 +39,7 @@ func Open(path string) (*File, error) {
 		return nil, err
 	}
 	return &File{
-		f:     f,
+		F:     f,
 		mtime: fi.ModTime(),
 		atime: orig.Get(fi),
 	}, nil
@@ -41,24 +47,24 @@ func Open(path string) (*File, error) {
 
 // Read implements io.Reader.
 func (a File) Read(p []byte) (int, error) {
-	return a.f.Read(p)
+	return a.F.Read(p)
 }
 
 // ReadAt implements io.ReaderAt.
 func (a File) ReadAt(p []byte, off int64) (int, error) {
-	return a.f.ReadAt(p, off)
+	return a.F.ReadAt(p, off)
 }
 
 // Seek implements io.Seeker.
 func (a File) Seek(offset int64, whence int) (int64, error) {
-	return a.f.Seek(offset, whence)
+	return a.F.Seek(offset, whence)
 }
 
 // Close closes the file,
 // restoring the mtime and atime to what they were when the file was first opened.
 func (a File) Close() error {
-	path := a.f.Name()
-	err := a.f.Close()
+	path := a.F.Name()
+	err := a.F.Close()
 	if err != nil {
 		return err
 	}
